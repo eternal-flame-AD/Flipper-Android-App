@@ -223,33 +223,7 @@ class ClickhouseApiImpl @Inject constructor(
         }
     }
 
-    private suspend fun reportToServerSafe(event: Metric.MetricEventsCollection): Unit = try {
-        val reportRequest = metricReportRequest {
-            uuid = getUUID()
-            version = applicationParams.version
-            sessionUuid = sessionUUID.toString()
-            platform = if (BuildConfig.DEBUG) {
-                Metric.MetricReportRequest.Platform.ANDROID_DEBUG
-            } else {
-                Metric.MetricReportRequest.Platform.ANDROID
-            }
-            events.add(event)
-        }
-        val httpResponse = client.post(METRIC_API_URL) {
-            header(HttpHeaders.ContentType, ContentType.Application.OctetStream)
-            setBody(reportRequest.toByteArray())
-        }
-        if (!httpResponse.status.isSuccess()) {
-            error {
-                "Failed report event to $METRIC_API_URL" +
-                    " $reportRequest with code ${httpResponse.status}"
-            }
-        } else {
-            verbose { "Sucs send event $event with ${reportRequest.uuid}" }
-        }
-    } catch (e: Exception) {
-        error(e) { "Failed report to server" }
-    }
+    private suspend fun reportToServerSafe(event: Metric.MetricEventsCollection): Unit = Unit;
 
     private suspend fun getUUID(): String {
         var uuid = dataStore.data.first().uuid

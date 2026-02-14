@@ -12,6 +12,13 @@ plugins {
 }
 
 android.namespace = "com.flipperdevices.app"
+android {
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+}
 
 dependencies {
     implementation(projects.components.core.di)

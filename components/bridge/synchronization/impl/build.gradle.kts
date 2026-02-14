@@ -21,8 +21,11 @@ dependencies {
 
     implementation(projects.components.bridge.dao.api)
     implementation(projects.components.bridge.connection.feature.storage.api)
+    implementation(projects.components.bridge.connection.feature.rpc.api)
     implementation(projects.components.bridge.connection.feature.common.api)
     implementation(projects.components.bridge.connection.feature.provider.api)
+    implementation(projects.components.bridge.connection.pbutils)
+
 
     implementation(projects.components.wearable.sync.handheld.api)
     implementation(projects.components.nfc.mfkey32.api)

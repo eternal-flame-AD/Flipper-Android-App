@@ -26,8 +26,6 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.timber.tressence)
-    implementation(libs.sentry)
-    implementation(libs.sentry.timber)
     implementation(libs.zip4j)
 
     // Compose

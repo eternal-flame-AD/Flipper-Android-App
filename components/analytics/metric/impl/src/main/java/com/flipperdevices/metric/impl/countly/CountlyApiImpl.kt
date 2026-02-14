@@ -60,15 +60,7 @@ class CountlyApiImpl @Inject constructor(
         id: String,
         params: Map<String, Any?>?
     ) {
-        if (countly.events() == null) {
-            return
-        }
-        verbose { "Report event $id with $params" }
-        if (params == null) {
-            countly.events().recordEvent(id)
-        } else {
-            countly.events().recordEvent(id, filterParams(params))
-        }
+        return
     }
 
     private fun initCountly(): Countly {

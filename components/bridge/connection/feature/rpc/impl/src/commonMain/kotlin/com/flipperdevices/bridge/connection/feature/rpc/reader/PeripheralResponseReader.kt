@@ -24,7 +24,6 @@ import kotlinx.coroutines.sync.Mutex
 class PeripheralResponseReader @AssistedInject constructor(
     @Assisted private val scope: CoroutineScope,
     @Assisted private val restartRPCApi: FRestartRpcFeatureApi?,
-    private val sentryApi: Shake2ReportApi
 ) : LogTagProvider {
     override val TAG = "PeripheralResponseReader"
     private val mutex = Mutex()
@@ -64,7 +63,6 @@ class PeripheralResponseReader @AssistedInject constructor(
                 // ignore
             } catch (e: Exception) {
                 error(e) { "Failed parse stream" }
-                sentryApi.reportException(e, "protobuf_read")
                 restartRPCApi?.restartRpc()
             }
         }

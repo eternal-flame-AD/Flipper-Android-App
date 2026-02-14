@@ -1,14 +1,11 @@
 import com.android.build.gradle.BaseExtension
 import com.flipperdevices.buildlogic.ApkConfig
-import com.flipperdevices.buildlogic.ApkConfig.IS_SENTRY_PUBLISH
-import io.sentry.android.gradle.extensions.SentryPluginExtension
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.multiplatform")
-    id("io.sentry.android.gradle")
     id("flipper.lint")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -87,11 +84,3 @@ kotlin {
 
 includeCommonKspConfigurationTo("kspAndroid", "kspDesktop")
 
-configure<SentryPluginExtension> {
-    autoUploadProguardMapping.set(IS_SENTRY_PUBLISH)
-    telemetry.set(false)
-
-    ignoredBuildTypes.set(setOf("release", "debug"))
-
-    autoInstallation.enabled.set(false)
-}
