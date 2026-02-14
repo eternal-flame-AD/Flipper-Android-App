@@ -1,8 +1,11 @@
 package com.flipperdevices.bridge.synchronization.impl
 
+import android.icu.util.GregorianCalendar
 import com.flipperdevices.bridge.connection.feature.provider.api.FFeatureProvider
 import com.flipperdevices.bridge.connection.feature.provider.api.getSync
 import com.flipperdevices.bridge.connection.feature.storage.api.FStorageFeatureApi
+import com.flipperdevices.bridge.connection.feature.rpc.api.FRpcFeatureApi
+import com.flipperdevices.bridge.connection.feature.rpc.model.wrapToRequest
 import com.flipperdevices.bridge.connection.feature.storage.api.fm.FFileStorageMD5Api
 import com.flipperdevices.bridge.dao.api.delegates.key.SimpleKeyApi
 import com.flipperdevices.bridge.dao.api.model.FlipperKeyType
@@ -16,15 +19,21 @@ import com.flipperdevices.bridge.synchronization.impl.repository.flipper.Timesta
 import com.flipperdevices.core.di.AppGraph
 import com.flipperdevices.core.di.ComponentHolder
 import com.flipperdevices.core.ktx.jre.FlipperDispatchers
+import com.flipperdevices.core.ktx.jre.toThrowableFlow
 import com.flipperdevices.core.log.LogTagProvider
 import com.flipperdevices.core.log.error
 import com.flipperdevices.core.log.info
+import com.flipperdevices.core.log.warn
 import com.flipperdevices.core.progress.DetailedProgressListener
 import com.flipperdevices.core.progress.DetailedProgressWrapperTracker
 import com.flipperdevices.core.ui.lifecycle.FOneTimeExecutionBleTask
 import com.flipperdevices.metric.api.MetricApi
 import com.flipperdevices.metric.api.events.complex.SynchronizationEnd
 import com.flipperdevices.nfc.mfkey32.api.MfKey32Api
+import com.flipperdevices.protobuf.CommandStatus
+import com.flipperdevices.protobuf.Main
+import com.flipperdevices.protobuf.system.DateTime
+import com.flipperdevices.protobuf.system.SetDateTimeRequest
 import com.flipperdevices.wearable.sync.handheld.api.SyncWearableApi
 import com.squareup.anvil.annotations.ContributesBinding
 import kotlinx.coroutines.CoroutineScope
@@ -127,6 +136,30 @@ class SynchronizationTaskImpl(
         val storageFeatureApi = featureProvider
             .getSync<FStorageFeatureApi>()
             ?: error("Can't find storage feature api")
+        val rpcFeatureApi = featureProvider
+            .getSync<FRpcFeatureApi>()
+            ?: error("Can't find rpc feature api")
+        val clock = GregorianCalendar();
+
+        rpcFeatureApi.request(
+            Main(
+                system_set_datetime_request = SetDateTimeRequest(
+                    datetime = DateTime(
+                        year = clock.get(GregorianCalendar.YEAR),
+                        month = clock.get(GregorianCalendar.MONTH) + 1,
+                        day = clock.get(GregorianCalendar.DAY_OF_MONTH),
+                        hour = clock.get(GregorianCalendar.HOUR_OF_DAY),
+                        minute = clock.get(GregorianCalendar.MINUTE),
+                        second = clock.get(GregorianCalendar.SECOND)
+                    )
+                )
+            ).wrapToRequest()
+        ).toThrowableFlow().collect { result ->
+            when (result.command_status) {
+                is CommandStatus.OK -> Unit
+                else -> warn { "time sync failed" }
+            }
+        }
         startInternal(
             scope = scope,
             storageFeatureApi = storageFeatureApi,
